@@ -22,3 +22,7 @@ func (s *ProdutoService) Save(produto entities.Produto) { //metodo salvar produt
 func (s *ProdutoService) FindAll() []entities.Produto {
 	return s.repository.FindAll()
 }
+
+func (s *ProdutoService) FindByID(id int) (entities.Produto, error) {
+	return s.repository.FindByID(id)
+}
