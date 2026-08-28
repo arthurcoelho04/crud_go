@@ -5,12 +5,20 @@ import (
 	"net/http"
 
 	"crud-go/controller"
+	"crud-go/database"
 	"crud-go/repository"
 	"crud-go/service"
 )
 
 func main() {
 
+	// Conecta ao banco de dados
+	db, err := database.Connect()
+	if err != nil {
+		panic(err)
+	}
+
+	defer db.Close()
 	// Cria o Repository
 	produtoRepository := repository.NewProdutoRepository()
 
@@ -21,7 +29,7 @@ func main() {
 	produtoController := controller.NewProdutoController(produtoService)
 
 	// Rota de produtos
-	http.HandleFunc("/produtos", produtoController.Delete)
+	http.HandleFunc("/produtos/", produtoController.Delete)
 
 	fmt.Println("Servidor rodando em http://localhost:8080")
 
