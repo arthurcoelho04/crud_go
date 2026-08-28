@@ -26,3 +26,7 @@ func (s *ProdutoService) FindAll() []entities.Produto {
 func (s *ProdutoService) FindByID(id int) (entities.Produto, error) {
 	return s.repository.FindByID(id)
 }
+
+func (s *ProdutoService) Delete(id int) {
+	s.repository.Delete(id)
+}

@@ -1,39 +1,39 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+
 	"crud-go/controller"
-	"crud-go/entities"
+	"crud-go/database"
 	"crud-go/repository"
 	"crud-go/service"
-	"fmt"
 )
 
 func main() {
 
+	// Conecta ao banco de dados
+	db, err := database.Connect()
+	if err != nil {
+		panic(err)
+	}
+
+	defer db.Close()
+	// Cria o Repository
 	produtoRepository := repository.NewProdutoRepository()
 
+	// Cria a Service usando o Repository
 	produtoService := service.NewProdutoService(produtoRepository)
 
+	// Cria o Controller usando a Service
 	produtoController := controller.NewProdutoController(produtoService)
 
+	// Rota de produtos
+	http.HandleFunc("/produtos/", produtoController.Delete)
+
+	fmt.Println("Servidor rodando em http://localhost:8080")
+
+	http.ListenAndServe(":8080", nil)
+
 	_ = produtoController
-
-	// Criando um produto
-	produto := entities.Produto{
-		ID:    1,
-		Nome:  "Notebook",
-		Preco: 3500,
-	}
-
-	// Salvando o produto
-	produtoService.Save(produto)
-
-	// Buscando o produto pelo ID
-	produtoEncontrado, err := produtoService.FindByID(1)
-
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(produtoEncontrado)
-	}
 }

@@ -1,7 +1,9 @@
 package repository
 
-import "crud-go/entities"
-import "errors"
+import (
+	"crud-go/entities"
+	"errors"
+)
 
 type ProdutoRepository struct {
 	produtos []entities.Produto
@@ -23,12 +25,36 @@ func (r *ProdutoRepository) FindAll() []entities.Produto { //retorna uma lista d
 
 func (r *ProdutoRepository) FindByID(id int) (entities.Produto, error) {
 
-    for _, produto := range r.produtos {
+	for _, produto := range r.produtos {
 
-        if produto.ID == id {
-            return produto, nil
-        }
-    }
+		if produto.ID == id {
+			return produto, nil
+		}
+	}
 
-    return entities.Produto{}, errors.New("produto não encontrado")
+	return entities.Produto{}, errors.New("produto não encontrado")
+}
+
+func (r *ProdutoRepository) Update(id int, produtoAtualizado entities.Produto) (entities.Produto, error) {
+
+	for i, produto := range r.produtos {
+
+		if produto.ID == id {
+
+			r.produtos[i] = produtoAtualizado
+
+			return produtoAtualizado, nil
+		}
+	}
+
+	return entities.Produto{}, errors.New("produto não encontrado")
+}
+
+func (r *ProdutoRepository) Delete(id int) { //Ele percorre a lista procurando o produto com depois deleta e finaliza o metodo
+	for i, produto := range r.produtos {
+		if produto.ID == id {
+			r.produtos = append(r.produtos[:i], r.produtos[i+1:]...)
+			return
+		}
+	}
 }
