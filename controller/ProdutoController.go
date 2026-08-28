@@ -2,6 +2,8 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 
 	"crud-go/service"
 )
@@ -17,9 +19,16 @@ func NewProdutoController(service *service.ProdutoService) *ProdutoController { 
 }
 
 func (c *ProdutoController) Delete(w http.ResponseWriter, r *http.Request) {
-	// futuramente vamos pegar o ID da URL
+	idString := strings.TrimPrefix(r.URL.Path, "/produtos/")
 
-	c.service.Delete(1)
+	id, err := strconv.Atoi(idString)
+
+	if err != nil {
+		http.Error(w, "ID inválido", http.StatusBadRequest)
+		return
+	}
+
+	c.service.Delete(id)//delete por id
 
 	w.WriteHeader(http.StatusNoContent)
 }
