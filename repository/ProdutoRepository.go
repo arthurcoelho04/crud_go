@@ -2,59 +2,54 @@ package repository
 
 import (
 	"crud-go/entities"
-	"errors"
+
+	"gorm.io/gorm"
 )
 
 type ProdutoRepository struct {
-	produtos []entities.Produto
+	db *gorm.DB
 }
 
-func NewProdutoRepository() *ProdutoRepository {
+func NewProdutoRepository(db *gorm.DB) *ProdutoRepository {
 	return &ProdutoRepository{
-		produtos: []entities.Produto{},
+		db: db,
 	}
 }
 
-func (r *ProdutoRepository) Save(produto entities.Produto) {
-	r.produtos = append(r.produtos, produto)
+// obs// Salva um novo produto no banco de dados
+func (r *ProdutoRepository) Save(produto entities.Produto) error {
+
+	err := r.db.Create(&produto).Error
+
+	return err
 }
 
-func (r *ProdutoRepository) FindAll() []entities.Produto { //retorna uma lista de produtos
-	return r.produtos
+// obs// Busca todos os produtos cadastrados no banco
+func (r *ProdutoRepository) FindAll() ([]entities.Produto, error) {
+	var produtos []entities.Produto
+
+	err := r.db.Find(&produtos).Error
+
+	return produtos, err
 }
 
+// obs// Busca um produto pelo ID
 func (r *ProdutoRepository) FindByID(id int) (entities.Produto, error) {
+	var produto entities.Produto
 
-	for _, produto := range r.produtos {
+	err := r.db.First(&produto, id).Error
 
-		if produto.ID == id {
-			return produto, nil
-		}
-	}
-
-	return entities.Produto{}, errors.New("produto não encontrado")
+	return produto, err
 }
 
-func (r *ProdutoRepository) Update(id int, produtoAtualizado entities.Produto) (entities.Produto, error) {
-
-	for i, produto := range r.produtos {
-
-		if produto.ID == id {
-
-			r.produtos[i] = produtoAtualizado
-
-			return produtoAtualizado, nil
-		}
-	}
-
-	return entities.Produto{}, errors.New("produto não encontrado")
+// obs// Deleta um produto pelo ID
+func (r *ProdutoRepository) Delete(id int) error {
+	return r.db.Delete(&entities.Produto{}, id).Error
 }
 
-func (r *ProdutoRepository) Delete(id int) { //Ele percorre a lista procurando o produto com depois deleta e finaliza o metodo
-	for i, produto := range r.produtos {
-		if produto.ID == id {
-			r.produtos = append(r.produtos[:i], r.produtos[i+1:]...)
-			return
-		}
-	}
+// obs// Atualiza um produto pelo ID
+func (r *ProdutoRepository) Update(id int, produtoAtualizado entities.Produto) error {
+	return r.db.Model(&entities.Produto{}).
+		Where("id = ?", id).
+		Updates(produtoAtualizado).Error
 }

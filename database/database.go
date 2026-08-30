@@ -1,22 +1,17 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func Connect() (*sql.DB, error) {
+func Connect() (*gorm.DB, error) {
 
-	connStr := "host=localhost port=5432 user=postgres password=1234 dbname=crud_go sslmode=disable"
+	dsn := "host=localhost user=postgres password=1234 dbname=crud_go port=5432 sslmode=disable"
 
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.Ping()
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
