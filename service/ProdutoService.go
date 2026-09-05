@@ -2,40 +2,55 @@ package service
 
 import (
 	"crud-go/entities"
-	"crud-go/repository"
+	"strings"
 )
 
 type ProdutoService struct {
-	repository *repository.ProdutoRepository
+	repository ProdutoRepositoryInterface
 }
 
-func NewProdutoService(repository *repository.ProdutoRepository) *ProdutoService {
+func NewProdutoService(repository ProdutoRepositoryInterface) *ProdutoService {
 	return &ProdutoService{
 		repository: repository,
 	}
 }
 
-// obs// Manda o produto para o Repository salvar no banco
+func validarProduto(produto entities.Produto) error {
+	if strings.TrimSpace(produto.Nome) == "" {
+		return ErrNomeObrigatorio
+	}
+
+	if produto.Preco < 0 {
+		return ErrPrecoInvalido
+	}
+
+	return nil
+}
+
 func (s *ProdutoService) Save(produto entities.Produto) error {
+	if err := validarProduto(produto); err != nil {
+		return err
+	}
+
 	return s.repository.Save(produto)
 }
 
-// obs// Busca todos os produtos através do Repository
 func (s *ProdutoService) FindAll() ([]entities.Produto, error) {
 	return s.repository.FindAll()
 }
 
-// obs// Busca um produto pelo ID através do Repository
 func (s *ProdutoService) FindByID(id int) (entities.Produto, error) {
 	return s.repository.FindByID(id)
 }
 
-// obs// Manda o ID para o Repository deletar o produto
 func (s *ProdutoService) Delete(id int) error {
 	return s.repository.Delete(id)
 }
 
-// obs// Manda os dados atualizados para o Repository
 func (s *ProdutoService) Update(id int, produtoAtualizado entities.Produto) error {
+	if err := validarProduto(produtoAtualizado); err != nil {
+		return err
+	}
+
 	return s.repository.Update(id, produtoAtualizado)
 }
