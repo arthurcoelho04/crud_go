@@ -3,6 +3,10 @@ package service
 import (
 	"crud-go/entities"
 	"crud-go/repository"
+	"errors"
+	"strings"
+
+	"gorm.io/gorm"
 )
 
 type ProdutoService struct {
@@ -15,27 +19,68 @@ func NewProdutoService(repository *repository.ProdutoRepository) *ProdutoService
 	}
 }
 
-// obs// Manda o produto para o Repository salvar no banco
-func (s *ProdutoService) Save(produto entities.Produto) error {
+func validarProduto(produto entities.Produto) error {
+	if strings.TrimSpace(produto.Nome) == "" {
+		return ErrNomeObrigatorio
+	}
+
+	if produto.Preco < 0 {
+		return ErrPrecoInvalido
+	}
+
+	return nil
+}
+
+func (s *ProdutoService) Save(produto *entities.Produto) error {
+	if err := validarProduto(*produto); err != nil {
+		return err
+	}
+
 	return s.repository.Save(produto)
 }
 
-// obs// Busca todos os produtos através do Repository
 func (s *ProdutoService) FindAll() ([]entities.Produto, error) {
 	return s.repository.FindAll()
 }
 
-// obs// Busca um produto pelo ID através do Repository
 func (s *ProdutoService) FindByID(id int) (entities.Produto, error) {
-	return s.repository.FindByID(id)
+	produto, err := s.repository.FindByID(id)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return entities.Produto{}, ErrProdutoNaoEncontrado
+	}
+
+	if err != nil {
+		return entities.Produto{}, err
+	}
+
+	return produto, nil
 }
 
-// obs// Manda o ID para o Repository deletar o produto
 func (s *ProdutoService) Delete(id int) error {
-	return s.repository.Delete(id)
+	err := s.repository.Delete(id)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return ErrProdutoNaoEncontrado
+	}
+
+	return err
 }
 
-// obs// Manda os dados atualizados para o Repository
-func (s *ProdutoService) Update(id int, produtoAtualizado entities.Produto) error {
-	return s.repository.Update(id, produtoAtualizado)
+func (s *ProdutoService) Update(
+	id int,
+	produtoAtualizado entities.Produto,
+) error {
+
+	if err := validarProduto(produtoAtualizado); err != nil {
+		return err
+	}
+
+	err := s.repository.Update(id, produtoAtualizado)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return ErrProdutoNaoEncontrado
+	}
+
+	return err
 }

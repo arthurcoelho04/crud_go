@@ -16,15 +16,10 @@ func NewProdutoRepository(db *gorm.DB) *ProdutoRepository {
 	}
 }
 
-// obs// Salva um novo produto no banco de dados
-func (r *ProdutoRepository) Save(produto entities.Produto) error {
-
-	err := r.db.Create(&produto).Error
-
-	return err
+func (r *ProdutoRepository) Save(produto *entities.Produto) error {
+	return r.db.Create(produto).Error
 }
 
-// obs// Busca todos os produtos cadastrados no banco
 func (r *ProdutoRepository) FindAll() ([]entities.Produto, error) {
 	var produtos []entities.Produto
 
@@ -33,7 +28,6 @@ func (r *ProdutoRepository) FindAll() ([]entities.Produto, error) {
 	return produtos, err
 }
 
-// obs// Busca um produto pelo ID
 func (r *ProdutoRepository) FindByID(id int) (entities.Produto, error) {
 	var produto entities.Produto
 
@@ -42,14 +36,35 @@ func (r *ProdutoRepository) FindByID(id int) (entities.Produto, error) {
 	return produto, err
 }
 
-// obs// Deleta um produto pelo ID
 func (r *ProdutoRepository) Delete(id int) error {
-	return r.db.Delete(&entities.Produto{}, id).Error
+	result := r.db.Delete(&entities.Produto{}, id)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }
 
-// obs// Atualiza um produto pelo ID
-func (r *ProdutoRepository) Update(id int, produtoAtualizado entities.Produto) error {
-	return r.db.Model(&entities.Produto{}).
+// Atualiza um produto pelo ID, incluindo campos com valor zero.
+func (r *ProdutoRepository) Update(id int, produto entities.Produto) error {
+	result := r.db.Model(&entities.Produto{}).
 		Where("id = ?", id).
-		Updates(produtoAtualizado).Error
+		Select("Nome", "Preco").
+		Updates(produto)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
+
 }
