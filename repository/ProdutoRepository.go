@@ -24,7 +24,7 @@ func (r *ProdutoRepository) Save(produto entities.Produto) error {
 	return err
 }
 
-// obs// Busca todos os produtos cadastrados no banco
+// obs// Get
 func (r *ProdutoRepository) FindAll() ([]entities.Produto, error) {
 	var produtos []entities.Produto
 
@@ -33,7 +33,7 @@ func (r *ProdutoRepository) FindAll() ([]entities.Produto, error) {
 	return produtos, err
 }
 
-// obs// Busca um produto pelo ID
+// obs// GetByID
 func (r *ProdutoRepository) FindByID(id int) (entities.Produto, error) {
 	var produto entities.Produto
 
@@ -42,7 +42,7 @@ func (r *ProdutoRepository) FindByID(id int) (entities.Produto, error) {
 	return produto, err
 }
 
-// obs// Deleta um produto pelo ID
+// obs// DeleteByID
 func (r *ProdutoRepository) Delete(id int) error {
 	return r.db.Delete(&entities.Produto{}, id).Error
 }
