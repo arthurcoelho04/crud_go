@@ -2,14 +2,18 @@ package service
 
 import (
 	"crud-go/entities"
+	"crud-go/repository"
+	"errors"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 type ProdutoService struct {
-	repository ProdutoRepositoryInterface
+	repository *repository.ProdutoRepository
 }
 
-func NewProdutoService(repository ProdutoRepositoryInterface) *ProdutoService {
+func NewProdutoService(repository *repository.ProdutoRepository) *ProdutoService {
 	return &ProdutoService{
 		repository: repository,
 	}
@@ -27,8 +31,8 @@ func validarProduto(produto entities.Produto) error {
 	return nil
 }
 
-func (s *ProdutoService) Save(produto entities.Produto) error {
-	if err := validarProduto(produto); err != nil {
+func (s *ProdutoService) Save(produto *entities.Produto) error {
+	if err := validarProduto(*produto); err != nil {
 		return err
 	}
 
@@ -40,17 +44,43 @@ func (s *ProdutoService) FindAll() ([]entities.Produto, error) {
 }
 
 func (s *ProdutoService) FindByID(id int) (entities.Produto, error) {
-	return s.repository.FindByID(id)
+	produto, err := s.repository.FindByID(id)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return entities.Produto{}, ErrProdutoNaoEncontrado
+	}
+
+	if err != nil {
+		return entities.Produto{}, err
+	}
+
+	return produto, nil
 }
 
 func (s *ProdutoService) Delete(id int) error {
-	return s.repository.Delete(id)
+	err := s.repository.Delete(id)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return ErrProdutoNaoEncontrado
+	}
+
+	return err
 }
 
-func (s *ProdutoService) Update(id int, produtoAtualizado entities.Produto) error {
+func (s *ProdutoService) Update(
+	id int,
+	produtoAtualizado entities.Produto,
+) error {
+
 	if err := validarProduto(produtoAtualizado); err != nil {
 		return err
 	}
 
-	return s.repository.Update(id, produtoAtualizado)
+	err := s.repository.Update(id, produtoAtualizado)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return ErrProdutoNaoEncontrado
+	}
+
+	return err
 }
