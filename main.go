@@ -28,7 +28,7 @@ func main() {
 	produtoController := controller.NewProdutoController(produtoService)
 
 	// obs// Rotas para listar todos os produtos e cadastrar um produto
-	http.HandleFunc("/produtos", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/produtos", func(w http.ResponseWriter, r *http.Request) { //oq sai & oq entra
 
 		switch r.Method {
 
@@ -62,8 +62,7 @@ func main() {
 		}
 	})
 
-	fmt.Println("Servidor rodando em http://localhost:8080")
-
+	fmt.Println("Servidor rodando em http://localhost:8080") //inicia o servidor HTTP
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
