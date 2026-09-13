@@ -3,5 +3,5 @@ package entities
 type Produto struct {
 	ID    int
 	Nome  string
-	Preco float64
+	Preco float64		//Double
 }
