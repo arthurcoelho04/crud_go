@@ -14,22 +14,22 @@ type ProdutoController struct {
 	service *service.ProdutoService
 }
 
-// Cria um novo controller utilizando a service de produtos.
+
 func NewProdutoController(service *service.ProdutoService) *ProdutoController {
 	return &ProdutoController{service: service}
 }
 
-// Save recebe os dados do produto e realiza o cadastro.
-func (c *ProdutoController) Save(w http.ResponseWriter, r *http.Request) {
-	var produto entities.Produto
+// Save recebe os dados do produto e realiza o cadastro. (POST)
+func (c *ProdutoController) Save(w http.ResponseWriter, r *http.Request) { 		// w = resposta http que sai
+	var produto entities.Produto										   		// r = requisição http que entra
 
-	if err := json.NewDecoder(r.Body).Decode(&produto); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&produto); err != nil {			// body = corpo da requisição HTTP
 		http.Error(w, "Dados inválidos", http.StatusBadRequest)
 		return
 	}
 
 	if err := c.service.Save(&produto); err != nil {
-		if errors.Is(err, service.ErrNomeObrigatorio) ||
+		if errors.Is(err, service.ErrNomeObrigatorio) ||					//nome obrigatório OU preço inválido
 			errors.Is(err, service.ErrPrecoInvalido) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -40,10 +40,10 @@ func (c *ProdutoController) Save(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(produto)
+	json.NewEncoder(w).Encode(produto)									 //converte o produto pra JSON
 }
 
-// FindAll retorna todos os produtos cadastrados.
+// FindAll retorna todos os produtos cadastrados. (GET)
 func (c *ProdutoController) FindAll(w http.ResponseWriter, r *http.Request) {
 	produtos, err := c.service.FindAll()
 
